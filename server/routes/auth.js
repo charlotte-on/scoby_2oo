@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const uploader = require("../config/cloudinary");
+const fileUploader = require("../config/cloudinary");
 
 const salt = 10;
 
@@ -37,7 +37,7 @@ router.post("/signin", (req, res, next) => {
     });
 });
 
-router.post("/signup", uploader.single("profileImg"), (req, res, next) => {
+router.post("/signup", fileUploader.single("profileImg"), (req, res, next) => {
   const {
     email,
     password,
