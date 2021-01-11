@@ -5,14 +5,33 @@ import "../../styles/form.css";
 class ItemForm extends Component {
   state = {};
 
+  imageRef = React.createRef();
+
+  static contextType = UserContext;
+
   handleChange(event) {
-    console.log("Wax On Wax Off");
-    this.setState({});
+    const key = event.target.name;
+    const value = event.target.value;
+
+    this.setState({
+      user: {
+        ...this.state.user,
+        [key]: value,
+      },
+    });
   }
 
   handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Wax On Wax Off");
+
+    const fd = new FormData();
+
+    for (let key in this.state.user) {
+      fd.append(key, this.state[key]);
+    }
+
+    fd.append("profileImage", this.imageRef.current.files[0]);
+    this.context.signup(fd);
 
     // In order to send back the data to the client, since there is an input type file you have to send the
     // data as formdata.
