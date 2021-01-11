@@ -51,9 +51,9 @@ const apiHandler = {
       .catch(errorHandler);
   },
 
-  createItem() {
+  createItem(data) {
     return service
-      .post("/api/items")
+      .post("/api/items", data)
       .then((res) => res.data)
       .catch(errorHandler);
   },

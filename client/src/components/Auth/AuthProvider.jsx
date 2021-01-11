@@ -54,13 +54,15 @@ class AuthProvider extends Component {
     this.setState({ user: null, isLoggedIn: false });
   };
 
-  createItem = async (data) => {
-    try {
-      await apiHandler.createItem(data);
-      this.props.history.push("/");
-    } catch (error) {
-      console.log(error);
-    }
+  createItem = (data) => {
+    apiHandler
+      .createItem(data)
+      .then(() => {
+        this.props.history.push("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   render() {
@@ -72,6 +74,7 @@ class AuthProvider extends Component {
       removeUser: this.removeUser,
       isLoggedIn: this.state.isLoggedIn,
       isLoading: this.state.isLoading,
+      createItem: this.createItem,
     };
     return (
       <AuthContext.Provider value={authValues}>
