@@ -54,6 +54,15 @@ class AuthProvider extends Component {
     this.setState({ user: null, isLoggedIn: false });
   };
 
+  createItem = async (data) => {
+    try {
+      await apiHandler.createItem(data);
+      this.props.history.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   render() {
     //  Setup all the values/functions you want to expose to anybody reading
     // from the AuthContext.

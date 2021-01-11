@@ -1,37 +1,42 @@
 import React, { Component } from "react";
 import LocationAutoComplete from "../LocationAutoComplete";
+import apiHandler from "../../api/apiHandler";
+import { withUser } from "../Auth/withUser";
+import { AuthContext } from "../Auth/AuthProvider";
 import "../../styles/form.css";
 
 class ItemForm extends Component {
-  state = {};
+  state = {
+    profileImg: "",
+  };
 
   imageRef = React.createRef();
 
-  static contextType = UserContext;
+  static contextType = AuthContext;
 
-  handleChange(event) {
+  handleChange = (event) => {
     const key = event.target.name;
     const value = event.target.value;
 
     this.setState({
-      user: {
-        ...this.state.user,
-        [key]: value,
-      },
+      [key]: value,
     });
-  }
+  };
 
   handleSubmit = (event) => {
     event.preventDefault();
 
     const fd = new FormData();
 
-    for (let key in this.state.user) {
+    for (let key in this.state) {
       fd.append(key, this.state[key]);
     }
 
-    fd.append("profileImage", this.imageRef.current.files[0]);
-    this.context.signup(fd);
+    console.log(this.imageRef);
+
+    fd.append("profileImg", this.imageRef.current.files[0]);
+    console.log(this.authContext);
+    this.authContext.createItem(fd);
 
     // In order to send back the data to the client, since there is an input type file you have to send the
     // data as formdata.
@@ -42,16 +47,18 @@ class ItemForm extends Component {
   };
 
   handlePlace = (place) => {
-    // This handle is passed as a callback to the autocomplete component.
-    // Take a look at the data and see what you can get from it.
-    // Look at the item model to know what you should retrieve and set as state.
-    console.log(place);
+    // console.log(place);
+    this.setState({
+      address: place.place_name,
+      location: place.geometry.coordinates,
+      formattedAddress: place.id,
+    });
   };
 
   render() {
     return (
       <div className="ItemForm-container">
-        <form className="form">
+        <form className="form" onSubmit={this.handleSubmit}>
           <h2 className="title">Add Item</h2>
 
           <div className="form-group">
@@ -62,6 +69,7 @@ class ItemForm extends Component {
               id="name"
               className="input"
               type="text"
+              name="name"
               onChange={this.handleChange}
               placeholder="What are you giving away ?"
             />
@@ -72,7 +80,12 @@ class ItemForm extends Component {
               Category
             </label>
 
-            <select id="category" defaultValue="-1">
+            <select
+              id="category"
+              defaultValue="-1"
+              name="property"
+              onChange={this.handleChange}
+            >
               <option value="-1" disabled>
                 Select a category
               </option>
@@ -87,7 +100,13 @@ class ItemForm extends Component {
             <label className="label" htmlFor="quantity">
               Quantity
             </label>
-            <input className="input" id="quantity" type="number" />
+            <input
+              className="input"
+              id="quantity"
+              type="number"
+              name="quantity"
+              onChange={this.handleChange}
+            />
           </div>
 
           <div className="form-group">
@@ -105,6 +124,8 @@ class ItemForm extends Component {
               id="description"
               className="text-area"
               placeholder="Tell us something about this item"
+              name="description"
+              onChange={this.handleChange}
             ></textarea>
           </div>
 
@@ -112,7 +133,14 @@ class ItemForm extends Component {
             <label className="custom-upload label" htmlFor="image">
               Upload image
             </label>
-            <input className="input" id="image" type="file" />
+            <input
+              className="input"
+              id="image"
+              type="file"
+              name="image"
+              ref={this.imageRef}
+              onChange={this.handleChange}
+            />
           </div>
 
           <h2>Contact information</h2>
@@ -122,10 +150,10 @@ class ItemForm extends Component {
               How do you want to be reached?
             </label>
             <div>
-              <input type="radio" />
+              <input type="radio" name="email" />
               user email
             </div>
-            <input type="radio" />
+            <input type="radio" name="phoneNumber" />
             contact phone number
           </div>
 
@@ -142,4 +170,4 @@ class ItemForm extends Component {
   }
 }
 
-export default ItemForm;
+export default withUser(ItemForm);

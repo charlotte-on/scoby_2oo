@@ -13,10 +13,11 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", fileUploader.single("profileImg"), (req, res, next) => {
   Item.create(req.body)
     .then((itemDocument) => {
       res.status(201).json(itemDocument);
+      if (req.file) newUser.profileImg = req.file.path;
     })
     .catch((error) => {
       next(error);

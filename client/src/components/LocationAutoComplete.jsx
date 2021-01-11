@@ -14,7 +14,7 @@ class LocationAutoComplete extends Component {
 
     if (!process.env.REACT_APP_MAPBOX_TOKEN) {
       throw new Error(
-        "You don't have any 'process.env.REACT_APP_MAPBOX_API_KEY'"
+        "You don't have any 'process.env.REACT_APP_MAPBOX_API_TOKEN'"
       );
     }
   }
