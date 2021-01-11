@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import apiHandler from "../../api/apiHandler";
 
 export const AuthContext = React.createContext();
@@ -21,6 +22,29 @@ class AuthProvider extends Component {
         this.setState({ user: null, isLoggedIn: false, isLoading: false });
       });
   }
+
+  signup = (data) => {
+    console.log("Here");
+
+    apiHandler
+      .signup(data)
+      .then(() => {
+        this.props.history.push("/signin");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  signin = async (data) => {
+    try {
+      const user = await apiHandler.signin(data);
+      this.setState({ user: user, isLoggedIn: true });
+      this.props.history.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   setUser = (user) => {
     this.setState({ user, isLoggedIn: true });
@@ -48,4 +72,4 @@ class AuthProvider extends Component {
   }
 }
 
-export default AuthProvider;
+export default withRouter(AuthProvider);

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const uploader = require("../config/cloudinary");
 
 const salt = 10;
 
@@ -36,8 +37,16 @@ router.post("/signin", (req, res, next) => {
     });
 });
 
-router.post("/signup", (req, res, next) => {
-  const { email, password, firstName, lastName } = req.body;
+router.post("/signup", uploader.single("profileImg"), (req, res, next) => {
+  const {
+    email,
+    password,
+    firstName,
+    lastName,
+    secondaryEmail,
+    phoneNumber,
+    city,
+  } = req.body;
 
   User.findOne({ email })
     .then((userDocument) => {
@@ -52,8 +61,15 @@ router.post("/signup", (req, res, next) => {
           email,
           lastName,
           firstName,
+          secondaryEmail,
+          phoneNumber,
+          city,
           password: hashedPassword,
         };
+
+        if (req.file) {
+          newUser.profileImg = req.file.path;
+        }
 
         User.create(newUser).then((newUserDocument) => {
           /** Down below this logs the user on signup.
