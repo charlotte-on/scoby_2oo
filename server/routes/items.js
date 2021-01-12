@@ -3,6 +3,8 @@ var router = express.Router();
 const Item = require("../models/Item");
 const fileUploader = require("../config/cloudinary");
 
+console.log(fileUploader);
+
 router.get("/", (req, res, next) => {
   Item.find()
     .then((itemDocuments) => {
@@ -13,11 +15,12 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.post("/", fileUploader.single("profileImg"), (req, res, next) => {
-  Item.create(req.body)
-    .then((itemDocument) => {
-      res.status(201).json(itemDocument);
-      if (req.file) newUser.profileImg = req.file.path;
+router.post("/", fileUploader.single("image"), (req, res, next) => {
+  const newItem = { ...req.body };
+  if (req.file) newItem.image = req.file.path;
+  Item.create(newItem)
+    .then((newItem) => {
+      res.status(201).json(newItem);
     })
     .catch((error) => {
       next(error);

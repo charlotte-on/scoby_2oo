@@ -1,22 +1,24 @@
 import React, { Component } from "react";
 import LocationAutoComplete from "../LocationAutoComplete";
-import apiHandler from "../../api/apiHandler";
 import { withUser } from "../Auth/withUser";
-import { AuthContext } from "../Auth/AuthProvider";
+import apiHandler from "../../api/apiHandler";
 import "../../styles/form.css";
 
 class ItemForm extends Component {
   state = {
-    profileImg: "",
+    user: this.props.authContext.user,
+    isLoggedIn: this.props.authContext.isLoggedIn,
   };
 
   imageRef = React.createRef();
 
-  static contextType = AuthContext;
+  // static contextType = AuthContext;
 
   handleChange = (event) => {
     const key = event.target.name;
     const value = event.target.value;
+
+    console.log(this.state);
 
     this.setState({
       [key]: value,
@@ -26,32 +28,76 @@ class ItemForm extends Component {
   handleSubmit = (event) => {
     event.preventDefault();
 
-    const fd = new FormData();
+    function buildFormData(formData, data, parentKey) {
+      if (
+        data &&
+        typeof data === "object" &&
+        !(data instanceof Date) &&
+        !(data instanceof File)
+      ) {
+        Object.keys(data).forEach((key) => {
+          buildFormData(
+            formData,
+            data[key],
+            parentKey ? `${parentKey}[${key}]` : key
+          );
+        });
+      } else {
+        const value = data == null ? "" : data;
 
-    for (let key in this.state) {
-      fd.append(key, this.state[key]);
+        formData.append(parentKey, value);
+      }
     }
 
-    console.log(this.imageRef);
+    function jsonToFormData(data) {
+      const fd = new FormData();
 
-    fd.append("profileImg", this.imageRef.current.files[0]);
-    console.log(this.authContext);
-    this.authContext.createItem(fd);
+      buildFormData(fd, data);
 
-    // In order to send back the data to the client, since there is an input type file you have to send the
-    // data as formdata.
-    // The object that you'll be sending will maybe be a nested object, in order to handle nested objects in our form data
-    // Check out the stackoverflow solution below : )
+      return fd;
+    }
 
-    // Nested object into formData by user Vladimir "Vladi vlad" Novopashin @stackoverflow : ) => https://stackoverflow.com/a/42483509
+    const datas = {
+      name: this.state.name,
+      property: this.state.property,
+      quantity: this.state.quantity,
+      address: this.state.address,
+      location: this.state.location,
+      formattedAddress: this.state.formattedAddress,
+      description: this.state.description,
+      image: this.state.image,
+      id_user: this.props.authContext.user._id,
+    };
+
+    let fd = jsonToFormData(datas);
+
+    apiHandler
+      .createItem(fd)
+      .then(() => {
+        this.props.history.push("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  handleImage = (event) => {
+    const key = event.target.name;
+    const value = this.imageRef.current.files[0];
+
+    this.setState({
+      [key]: value,
+    });
   };
 
   handlePlace = (place) => {
-    // console.log(place);
     this.setState({
       address: place.place_name,
-      location: place.geometry.coordinates,
-      formattedAddress: place.id,
+      location: {
+        type: place.geometry.type,
+        coordinates: place.geometry.coordinates,
+      },
+      formattedAddress: place.place_name,
     });
   };
 
@@ -139,7 +185,7 @@ class ItemForm extends Component {
               type="file"
               name="image"
               ref={this.imageRef}
-              onChange={this.handleChange}
+              onChange={this.handleImage}
             />
           </div>
 

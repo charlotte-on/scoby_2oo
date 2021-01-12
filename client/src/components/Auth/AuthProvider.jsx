@@ -39,6 +39,7 @@ class AuthProvider extends Component {
   signin = async (data) => {
     try {
       const user = await apiHandler.signin(data);
+      console.log(data);
       this.setState({ user: user, isLoggedIn: true });
       this.props.history.push("/");
     } catch (error) {
@@ -54,17 +55,6 @@ class AuthProvider extends Component {
     this.setState({ user: null, isLoggedIn: false });
   };
 
-  createItem = (data) => {
-    apiHandler
-      .createItem(data)
-      .then(() => {
-        this.props.history.push("/");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
   render() {
     //  Setup all the values/functions you want to expose to anybody reading
     // from the AuthContext.
@@ -74,7 +64,6 @@ class AuthProvider extends Component {
       removeUser: this.removeUser,
       isLoggedIn: this.state.isLoggedIn,
       isLoading: this.state.isLoading,
-      createItem: this.createItem,
     };
     return (
       <AuthContext.Provider value={authValues}>
